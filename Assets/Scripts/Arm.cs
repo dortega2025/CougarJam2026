@@ -15,7 +15,10 @@ public class Arm : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        RotateArm();
+        if (Time.timeScale == 1f)
+        {
+            RotateArm();
+        }
     }
 
     void RotateArm()

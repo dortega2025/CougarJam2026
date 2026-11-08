@@ -24,6 +24,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private float timeLeft = 30f;
     [SerializeField] private GameObject successPanel;
     [SerializeField] private GameObject failurePanel;
+    [SerializeField] private GameObject info;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -93,12 +94,14 @@ public class GameManager : MonoBehaviour
     void Success()
     {
         Time.timeScale = 0f;
+        info.SetActive(false);
         successPanel.SetActive(true);
     }
 
     void Failure()
     {
         Time.timeScale = 0f;
+        info.SetActive(false);
         failurePanel.SetActive(true);
     }
 }
