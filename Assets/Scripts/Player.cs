@@ -17,12 +17,16 @@ public class Player : MonoBehaviour
     public GameObject barrel;
     public GameObject cursor;
     [SerializeField] private LayerMask hitLayer;
-    private float damageInterval = 1f;
-    private float damageTimer = 0f;
+    [SerializeField] private float damageInterval;
+    private float damageTimer;
+    [SerializeField] private float damage;
     public LineRenderer heal;
     [SerializeField] private LayerMask healLayer;
-    private float healInterval = 1f;
+    [SerializeField] private float healInterval;
+    [SerializeField] private float healAmount;
     private float healTimer = 0f;
+    [SerializeField] private Sprite[] sprites;
+    [SerializeField] private SpriteRenderer spriteRenderer;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -36,6 +40,7 @@ public class Player : MonoBehaviour
     void FixedUpdate()
     {
         Movement();
+        Look();
     }
 
     void LateUpdate()
@@ -83,9 +88,9 @@ public class Player : MonoBehaviour
         {
            end = hit.point;
            damageTimer -= Time.deltaTime;
-           if (damageTimer < 0f && hit.collider.gameObject.GetComponent<Tilemap>() == null)
+           if (damageTimer < 0f && hit.collider.gameObject.GetComponent<Tilemap>() == null && hit.collider.gameObject.tag == "Enemy")
             {
-                hit.collider.gameObject.GetComponent<Bacteria>().health -= 5f;
+                hit.collider.gameObject.GetComponent<Bacteria>().health -= damage;
                 damageTimer = damageInterval;
             }
         }
@@ -115,14 +120,48 @@ public class Player : MonoBehaviour
         if (hit)
         {
            end = hit.point;
-        //    damageTimer -= Time.deltaTime;
-        //    if (damageTimer < 0f && hit.collider.gameObject.GetComponent<Tilemap>() == null)
-        //     {
-        //         hit.collider.gameObject.GetComponent<Bacteria>().health -= 5f;
-        //         damageTimer = damageInterval;
-        //     }
+           healTimer -= Time.deltaTime;
+           if (healTimer < 0f && hit.collider.gameObject.GetComponent<Tilemap>() == null 
+            && hit.collider.gameObject.tag == "Heart" && hit.collider.gameObject.GetComponent<Heart>().currHealth < hit.collider.gameObject.GetComponent<Heart>().maxHealth)
+            {
+                float dif = hit.collider.gameObject.GetComponent<Heart>().maxHealth - hit.collider.gameObject.GetComponent<Heart>().currHealth;
+                if (dif > healAmount)
+                {
+                    hit.collider.gameObject.GetComponent<Heart>().currHealth += healAmount;
+                } else
+                {
+                    hit.collider.gameObject.GetComponent<Heart>().currHealth += dif;
+                }
+                
+                healTimer = healInterval;
+            }
         }
         heal.SetPosition(0, barrel.transform.position);
         heal.SetPosition(1, end);
+    }
+
+    void Look()
+    {
+        Vector3 direction = new Vector3(cursor.transform.up.x, cursor.transform.up.y, 0).normalized;
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90;
+        angle = Mathf.Repeat(angle, 360);
+        angle -= transform.rotation.z;
+        int spriteDirection;
+        switch (angle)
+        {
+            case < 45:
+                spriteDirection = 0;
+                break;
+            case < 135:
+                spriteDirection = 1;
+                break;
+            case < 225:
+                spriteDirection = 2;
+                break;
+            default:
+                spriteDirection = 3;
+                break;
+        }
+        spriteRenderer.sprite = sprites[spriteDirection];
     }
 }
